@@ -1,33 +1,64 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import AuthLayout from './layouts/AuthLayout'
+import ProtectedRoute from './layouts/ProtectedRoute'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import ResetPassword from './pages/ResetPassword'
+import NewPassword from './pages/NewPassword'
+import ConfirmAccount from './pages/ConfirmAccount'
+import Projects from './pages/Projects'
+import { AuthProvider } from './context/AuthProvider'
+import { ProjectsProvider } from './context/ProjectsProvider'
+import NewProject from './pages/NewProject'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
+    <BrowserRouter>
+      <AuthProvider>
+        <ProjectsProvider>
+          <Routes>
+            <Route
+              path='/'
+              element={<AuthLayout />}
+            >
+              <Route
+                index
+                element={<Login />}
+              />
+              <Route
+                path='/register'
+                element={<Register />}
+              />
+              <Route
+                path='/reset-password'
+                element={<ResetPassword />}
+              />
+              <Route
+                path='/reset-password/:token'
+                element={<NewPassword />}
+              />
+              <Route
+                path='/confirm/:id'
+                element={<ConfirmAccount />}
+              />
+            </Route>
+            <Route
+              path='/projects'
+              element={<ProtectedRoute />}
+            >
+              <Route
+                index
+                element={<Projects />}
+              />
+              <Route
+                path='new-project'
+                element={<NewProject />}
+              />
+            </Route>
+          </Routes>
+        </ProjectsProvider>
+      </AuthProvider>
+    </BrowserRouter>
   )
 }
 
