@@ -1,6 +1,6 @@
-const ProjectList = project => {
+const ProjectPreview = ({ project }) => {
   const { name, _id, client } = project
-  return <div>{project.name}</div>
+  return <div>{name}</div>
 }
 
 export default ProjectPreview
