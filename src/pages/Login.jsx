@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axiosAPIClient from '../config/clientAxios'
 import Alert from '../components/Alert'
@@ -10,7 +10,7 @@ const Login = () => {
   const [alert, setAlert] = useState({})
 
   const { setAuth } = useAuth()
-
+  const navigate = useNavigate()
   const handleSubmit = async e => {
     e.preventDefault()
     if ([email, password].includes('')) {
@@ -22,9 +22,11 @@ const Login = () => {
         email,
         password,
       })
-      localStorage.setItem('token', data.token)
+      localStorage.setItem('token', data.user.token)
       setAuth(data)
       setAlert({})
+      console.log('successfull')
+      navigate('/projects')
     } catch (error) {
       console.log(error.response.data)
       setAlert(error.response.data)

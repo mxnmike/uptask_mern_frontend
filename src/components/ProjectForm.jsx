@@ -1,14 +1,26 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
 import useProjects from '../hooks/useProjects'
 import Alert from './Alert'
 
 const ProjectForm = () => {
+  const [id, setId] = useState(null)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [dueDate, setDueDate] = useState('')
   const [client, setClient] = useState('')
+  const { alert, showAlert, submitProject, project } = useProjects()
+  const params = useParams()
 
-  const { alert, showAlert, submitProject } = useProjects()
+  useEffect(() => {
+    if (params.id) {
+      setId(project._id)
+      setName(project.name)
+      setDescription(project.description)
+      setDueDate(project.dueDate?.split('T')[0])
+      setClient(project.client)
+    }
+  }, [params])
 
   const handleSubmit = async e => {
     e.preventDefault()
@@ -19,7 +31,8 @@ const ProjectForm = () => {
     }
     showAlert({})
     try {
-      await submitProject({ name, description, dueDate, client })
+      await submitProject({ id, name, description, dueDate, client })
+      setId(null)
       setName('')
       setDescription('')
       setDueDate('')
@@ -103,8 +116,7 @@ const ProjectForm = () => {
       <input
         type='submit'
         className='bg-sky-600 w-full p-3 uppercase font-bold text-white rounded cursor-pointer betterhover:hover:bg-sky-700 transition-colors'
-        placeholder='Client Name'
-        value='create project'
+        value={params.id ? 'Save Changes' : 'create project'}
       />
     </form>
   )

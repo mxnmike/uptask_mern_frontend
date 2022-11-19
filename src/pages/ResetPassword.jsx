@@ -84,7 +84,7 @@ const ResetPassword = () => {
           Have an Account? Sign-In here
         </Link>
         <Link
-          to='/register'
+          to='register'
           className='block text-center my-5 text-slate-500 uppercase text-sm'
         >
           No account? Register here

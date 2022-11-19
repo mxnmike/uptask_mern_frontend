@@ -10,50 +10,28 @@ import Projects from './pages/Projects'
 import { AuthProvider } from './context/AuthProvider'
 import { ProjectsProvider } from './context/ProjectsProvider'
 import NewProject from './pages/NewProject'
+import Project from './pages/Project'
+import EditProject from './pages/EditProject'
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <ProjectsProvider>
+          {/* prettier-ignore */}
           <Routes>
-            <Route
-              path='/'
-              element={<AuthLayout />}
-            >
-              <Route
-                index
-                element={<Login />}
-              />
-              <Route
-                path='/register'
-                element={<Register />}
-              />
-              <Route
-                path='/reset-password'
-                element={<ResetPassword />}
-              />
-              <Route
-                path='/reset-password/:token'
-                element={<NewPassword />}
-              />
-              <Route
-                path='/confirm/:id'
-                element={<ConfirmAccount />}
-              />
+            <Route path='/' element={<AuthLayout />}>
+              <Route index element={<Login />} />
+              <Route path='register' element={<Register />} />
+              <Route path='reset-password' element={<ResetPassword />} />
+              <Route path='reset-password/:token' element={<NewPassword />} />
+              <Route path='confirm/:id' element={<ConfirmAccount />} />
             </Route>
-            <Route
-              path='/projects'
-              element={<ProtectedRoute />}
-            >
-              <Route
-                index
-                element={<Projects />}
-              />
-              <Route
-                path='new-project'
-                element={<NewProject />}
-              />
+            <Route path='/projects' element={<ProtectedRoute />}>
+              <Route index element={<Projects />} />
+              <Route path='new-project' element={<NewProject />} />
+              <Route path=':id' element={<Project />} />
+              <Route path='edit/:id' element={<EditProject />} />
             </Route>
           </Routes>
         </ProjectsProvider>

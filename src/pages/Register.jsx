@@ -160,7 +160,7 @@ const Register = () => {
           Have an Account? Sign-In here
         </Link>
         <Link
-          to='/reset-password'
+          to='reset-password'
           className='block text-center my-5 text-slate-500 uppercase text-sm'
         >
           Forgot My Password

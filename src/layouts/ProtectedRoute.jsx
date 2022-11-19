@@ -4,9 +4,10 @@ import Header from '../components/Header'
 import Sidebar from '../components/Sidebar'
 
 const ProtectedRoute = () => {
-  const { auth, loading } = useAuth()
+  const { auth } = useAuth()
   const { user } = auth
-  if (loading) return 'loading'
+  if (!user?._id) return 'loading'
+
   return (
     <>
       {user?._id ? (

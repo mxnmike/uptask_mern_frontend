@@ -1,5 +1,11 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 const Header = () => {
+  const navigate = useNavigate()
+
+  const handleSignOut = () => {
+    localStorage.setItem('token', null)
+    navigate('/')
+  }
   return (
     <header className='px-4 py-5 bg-white border-b'>
       <div className='md:flex md:justify-between'>
@@ -18,6 +24,7 @@ const Header = () => {
             Projects
           </Link>
           <button
+            // onClick={handleSignOut}
             className='text-white text-sm bg-sky-600 p-3 rounded-md uppercase font-bold'
             type='button'
           >
