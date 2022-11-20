@@ -6,6 +6,7 @@ import Sidebar from '../components/Sidebar'
 const ProtectedRoute = () => {
   const { auth } = useAuth()
   const { user } = auth
+  console.log('user:', user)
   if (!user?._id) return 'loading'
 
   return (

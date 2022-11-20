@@ -1,11 +1,21 @@
 import { Link, useNavigate } from 'react-router-dom'
+import useAuth from '../hooks/useAuth'
+import useProjects from '../hooks/useProjects'
+import useTasks from '../hooks/useTasks'
+
 const Header = () => {
   const navigate = useNavigate()
+  // const { handleSignOut } = useAuth()
+  const { resetProjectsProvider } = useProjects()
+  const { resetTasksProvider } = useTasks()
 
   const handleSignOut = () => {
-    localStorage.setItem('token', null)
+    localStorage.removeItem('token')
+    resetTasksProvider()
+    resetProjectsProvider()
     navigate('/')
   }
+
   return (
     <header className='px-4 py-5 bg-white border-b'>
       <div className='md:flex md:justify-between'>
@@ -24,7 +34,7 @@ const Header = () => {
             Projects
           </Link>
           <button
-            // onClick={handleSignOut}
+            onClick={handleSignOut}
             className='text-white text-sm bg-sky-600 p-3 rounded-md uppercase font-bold'
             type='button'
           >

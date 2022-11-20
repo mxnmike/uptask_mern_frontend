@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axiosAPIClient from '../config/clientAxios'
+import useTasks from '../hooks/useTasks'
 
 const ProjectsContext = createContext()
 
@@ -11,8 +12,17 @@ const ProjectsProvider = ({ children }) => {
   const [loading, setLoading] = useState(false)
   const [formTaskModal, setFormTaskModal] = useState(false)
 
+  // const { resetTasksProvider } = useTasks()
+
   const navigate = useNavigate()
 
+  const resetProjectsProvider = () => {
+    const token = localStorage.getItem('token')
+    if (token) return
+    setProjects([])
+    setProject({})
+    // resetTasksProvider()
+  }
   useEffect(() => {
     const getProjects = async () => {
       try {
@@ -147,6 +157,7 @@ const ProjectsProvider = ({ children }) => {
         loading,
         formTaskModal,
         handleFormTaskModal,
+        resetProjectsProvider,
       }}
     >
       {children}

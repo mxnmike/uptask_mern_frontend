@@ -4,6 +4,10 @@ import useProjects from '../hooks/useProjects'
 
 const Projects = () => {
   const { projects } = useProjects()
+  console.log('count', projects.count)
+  if (projects.count === 0) {
+    return 'Loading...'
+  }
   return (
     <>
       <h1 className='text-4xl font-black'>Projects</h1>
