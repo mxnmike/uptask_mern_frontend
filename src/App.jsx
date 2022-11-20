@@ -9,6 +9,7 @@ import ConfirmAccount from './pages/ConfirmAccount'
 import Projects from './pages/Projects'
 import { AuthProvider } from './context/AuthProvider'
 import { ProjectsProvider } from './context/ProjectsProvider'
+import { TasksProvider } from './context/TasksProvider'
 import NewProject from './pages/NewProject'
 import Project from './pages/Project'
 import EditProject from './pages/EditProject'
@@ -18,8 +19,9 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <ProjectsProvider>
-          {/* prettier-ignore */}
-          <Routes>
+          <TasksProvider>
+            {/* prettier-ignore */}
+            <Routes>
             <Route path='/' element={<AuthLayout />}>
               <Route index element={<Login />} />
               <Route path='register' element={<Register />} />
@@ -34,6 +36,7 @@ function App() {
               <Route path='edit/:id' element={<EditProject />} />
             </Route>
           </Routes>
+          </TasksProvider>
         </ProjectsProvider>
       </AuthProvider>
     </BrowserRouter>

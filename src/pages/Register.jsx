@@ -58,7 +58,6 @@ const Register = () => {
         email,
         password,
       })
-      // console.log(data)
       setAlert(data)
       resetForm()
     } catch (error) {

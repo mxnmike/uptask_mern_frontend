@@ -7,7 +7,8 @@ import FormTaskModal from '../components/FormTaskModal'
 
 const Project = () => {
   const params = useParams()
-  const { getProject, project, loading, handleFormTaskModal } = useProjects()
+  const { getProject, project, loading, handleFormTaskModal, tasks } =
+    useProjects()
 
   useEffectOnce(() => {
     getProject(params.id)

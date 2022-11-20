@@ -4,7 +4,6 @@ const TasksContext = createContext()
 
 const TasksProvider = ({ children }) => {
   const [task, setTask] = useState({})
-  const [tasks, setTasks] = useState([])
 
   const resetTasksProvider = () => {
     const token = localStorage.getItem('token')

@@ -4,7 +4,7 @@ import useAuth from '../hooks/useAuth'
 const Sidebar = () => {
   const { auth, loading } = useAuth()
   const { user } = auth
-  if (loading) return 'loading...'
+  if (!user?._id) return 'loading...'
   return (
     <aside className='md:w-80 lg: w-96 px-5 py-10'>
       <p className='text-xl font-bold'>Hola: {user?.name}</p>

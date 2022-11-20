@@ -1,13 +1,11 @@
 import { useState, useEffect, createContext } from 'react'
 import ProjectPreview from '../components/ProjectPreview'
 import useProjects from '../hooks/useProjects'
+import useAuth from '../hooks/useAuth'
 
 const Projects = () => {
   const { projects } = useProjects()
-  console.log('count', projects.count)
-  if (projects.count === 0) {
-    return 'Loading...'
-  }
+
   return (
     <>
       <h1 className='text-4xl font-black'>Projects</h1>

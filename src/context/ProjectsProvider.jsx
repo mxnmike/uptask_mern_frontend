@@ -1,7 +1,6 @@
 import { useState, useEffect, createContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axiosAPIClient from '../config/clientAxios'
-import useTasks from '../hooks/useTasks'
 
 const ProjectsContext = createContext()
 
@@ -11,18 +10,15 @@ const ProjectsProvider = ({ children }) => {
   const [alert, setAlert] = useState({})
   const [loading, setLoading] = useState(false)
   const [formTaskModal, setFormTaskModal] = useState(false)
+  const [authorizedUser, setAuthorizedUser] = useState(false)
+
+  //TASKS
+  const [tasks, setTasks] = useState([])
 
   // const { resetTasksProvider } = useTasks()
 
   const navigate = useNavigate()
 
-  const resetProjectsProvider = () => {
-    const token = localStorage.getItem('token')
-    if (token) return
-    setProjects([])
-    setProject({})
-    // resetTasksProvider()
-  }
   useEffect(() => {
     const getProjects = async () => {
       try {
@@ -41,7 +37,8 @@ const ProjectsProvider = ({ children }) => {
       }
     }
     return () => getProjects()
-  }, [])
+  }, [authorizedUser])
+
   const showAlert = alert => {
     setAlert(alert)
     setTimeout(() => {
@@ -110,7 +107,6 @@ const ProjectsProvider = ({ children }) => {
   }
 
   const deleteProject = async id => {
-    console.log(id)
     try {
       const token = localStorage.getItem('token')
 
@@ -144,6 +140,52 @@ const ProjectsProvider = ({ children }) => {
     setFormTaskModal(!formTaskModal)
   }
 
+  const resetProjectsProvider = () => {
+    const token = localStorage.getItem('token')
+    if (token) return
+    setProjects([])
+    setProject({})
+    setAuthorizedUser(false)
+  }
+
+  const submitTask = async task => {
+    try {
+      const token = localStorage.getItem('token')
+      if (!token) return
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+      if (task.id) {
+        //Editing
+        const { data } = await axiosAPIClient.put(
+          `/tasks/${task.id}`,
+          task,
+          config
+        )
+
+        const { updatedTask } = data
+        const updatedTasks = updatedTask.map(taskState =>
+          taskState._id === updatedTask._id ? updatedTask : taskState
+        )
+        setTasks(updatedTasks)
+        setAlert({ error: false, message: `Task Saved Successfully` })
+      } else {
+        const { data } = await axiosAPIClient.post('/tasks', task, config)
+        setTasks([...tasks, data])
+        setAlert({ error: false, message: `Task Created Successfully` })
+      }
+      setTimeout(() => {
+        setAlert({})
+        navigate(`/projects/${task.project}`)
+      }, 3000)
+    } catch (error) {
+      setAlert(error.response.data)
+    }
+  }
+
   return (
     <ProjectsContext.Provider
       value={{
@@ -158,6 +200,9 @@ const ProjectsProvider = ({ children }) => {
         formTaskModal,
         handleFormTaskModal,
         resetProjectsProvider,
+        setAuthorizedUser,
+        submitTask,
+        tasks,
       }}
     >
       {children}

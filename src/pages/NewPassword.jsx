@@ -70,7 +70,6 @@ const NewPassword = () => {
       setResetedPassword(true)
       resetForm()
     } catch (error) {
-      console.log(error.response.data)
       setAlert(error.response.data)
     }
   }

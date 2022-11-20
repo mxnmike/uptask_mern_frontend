@@ -1,6 +1,8 @@
 import { Fragment, useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
 import { Dialog, Transition } from '@headlessui/react'
 import useProjects from '../hooks/useProjects'
+import Alert from './Alert'
 
 const PRIORITY = ['Low', 'Medium', 'High']
 
@@ -8,8 +10,36 @@ const FormTaksModal = () => {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState('')
-  const { formTaskModal, handleFormTaskModal } = useProjects()
+  const [dueDate, setDueDate] = useState('')
+  const { formTaskModal, handleFormTaskModal, showAlert, alert, submitTask } =
+    useProjects()
 
+  const params = useParams()
+
+  const handleSubmit = e => {
+    e.preventDefault()
+
+    if ([name, description, dueDate, priority].includes('')) {
+      showAlert({
+        error: true,
+        message: 'All Fields are Required',
+      })
+      return
+    }
+    showAlert({})
+    try {
+      console.log('duedate:', dueDate)
+      submitTask({ name, description, dueDate, priority, project: params.id })
+      setName('')
+      setDescription('')
+      setPriority('')
+      setDueDate('')
+    } catch (error) {
+      showAlert(error.response.data)
+    }
+  }
+
+  const { message } = alert
   return (
     <Transition.Root
       show={formTaskModal}
@@ -81,7 +111,11 @@ const FormTaksModal = () => {
                   >
                     New Task
                   </Dialog.Title>
-                  <form className='my-10'>
+                  {message && <Alert alert={alert} />}
+                  <form
+                    className='my-10'
+                    onSubmit={handleSubmit}
+                  >
                     <div className='mb-5'>
                       <label
                         className='text-gray-700 uppercase font-bold text-sm'
@@ -120,13 +154,29 @@ const FormTaksModal = () => {
                     <div className='mb-5'>
                       <label
                         className='text-gray-700 uppercase font-bold text-sm'
+                        htmlFor='due-date'
+                      >
+                        Due Date
+                      </label>
+                      <input
+                        id='due-date'
+                        type='date'
+                        className='border w-full p-2 mt-2 placeholder-gray-400 rounded-md'
+                        value={dueDate}
+                        onChange={e => setDueDate(e.target.value)}
+                      />
+                    </div>
+
+                    <div className='mb-5'>
+                      <label
+                        className='text-gray-700 uppercase font-bold text-sm'
                         htmlFor='priority'
                       >
                         Task Priority
                       </label>
                       <select
                         id='priority'
-                        className=''
+                        className='border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md'
                         value={priority}
                         onChange={e => setPriority(e.target.value)}
                       >
@@ -136,6 +186,11 @@ const FormTaksModal = () => {
                         ))}
                       </select>
                     </div>
+                    <input
+                      type='submit'
+                      className='bg-sky-600 betterhover:hover:bg-sky-700 w-full p-3 text-white uppercase font-bold cursor-pointer transition-colors rounded text-sm'
+                      value='Create Task'
+                    />
                   </form>
                 </div>
               </div>

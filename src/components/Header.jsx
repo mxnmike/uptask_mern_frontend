@@ -1,18 +1,16 @@
 import { Link, useNavigate } from 'react-router-dom'
-import useAuth from '../hooks/useAuth'
-import useProjects from '../hooks/useProjects'
+// import useProjects from '../hooks/useProjects'
 import useTasks from '../hooks/useTasks'
 
 const Header = () => {
   const navigate = useNavigate()
-  // const { handleSignOut } = useAuth()
-  const { resetProjectsProvider } = useProjects()
-  const { resetTasksProvider } = useTasks()
+  // const { resetProjectsProvider } = useProjects()
+  // const { resetTasksProvider } = useTasks()
 
   const handleSignOut = () => {
     localStorage.removeItem('token')
-    resetTasksProvider()
-    resetProjectsProvider()
+    // resetProjectsProvider()
+    // resetTasksProvider()
     navigate('/')
   }
 
