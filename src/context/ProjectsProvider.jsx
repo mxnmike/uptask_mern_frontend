@@ -10,12 +10,10 @@ const ProjectsProvider = ({ children }) => {
   const [alert, setAlert] = useState({})
   const [loading, setLoading] = useState(false)
   const [formTaskModal, setFormTaskModal] = useState(false)
+  const [deleteTaskModal, setDeleteTaskModal] = useState(false)
   const [authorizedUser, setAuthorizedUser] = useState(false)
-
-  //TASKS
-  const [tasks, setTasks] = useState([])
-
-  // const { resetTasksProvider } = useTasks()
+  const [task, setTask] = useState({})
+  const [collaborator, setCollaborator] = useState({})
 
   const navigate = useNavigate()
 
@@ -58,6 +56,7 @@ const ProjectsProvider = ({ children }) => {
       }
       if (project.id) {
         //Editing
+        console.log('Editing')
         const { data } = await axiosAPIClient.put(
           `/projects/${project.id}`,
           project,
@@ -72,11 +71,13 @@ const ProjectsProvider = ({ children }) => {
         setProjects(updatedProjects)
         setAlert({ error: false, message: `Project Saved Successfully` })
       } else {
+        console.log('Creating New')
         const { data } = await axiosAPIClient.post('/projects', project, config)
         setProjects([...projects, data])
         setAlert({ error: false, message: `Project Created Successfully` })
       }
       setTimeout(() => {
+        if (project._id) return
         setAlert({})
         setProject({})
         navigate('/projects')
@@ -100,6 +101,7 @@ const ProjectsProvider = ({ children }) => {
       const { data } = await axiosAPIClient(`/projects/${id}`, config)
       setProject(data.project)
     } catch (error) {
+      console.log('Error:', error.response.data)
       setAlert(error.response.data)
     } finally {
       setLoading(false)
@@ -138,6 +140,12 @@ const ProjectsProvider = ({ children }) => {
 
   const handleFormTaskModal = () => {
     setFormTaskModal(!formTaskModal)
+    setTask({})
+  }
+
+  const handleDeleteTaskModal = () => {
+    setDeleteTaskModal(!deleteTaskModal)
+    // setTask({})
   }
 
   const resetProjectsProvider = () => {
@@ -159,7 +167,7 @@ const ProjectsProvider = ({ children }) => {
         },
       }
       if (task.id) {
-        //Editing
+        //Editing task
         const { data } = await axiosAPIClient.put(
           `/tasks/${task.id}`,
           task,
@@ -167,23 +175,120 @@ const ProjectsProvider = ({ children }) => {
         )
 
         const { updatedTask } = data
-        const updatedTasks = updatedTask.map(taskState =>
+        const updatedTasks = project.tasks.map(taskState =>
           taskState._id === updatedTask._id ? updatedTask : taskState
         )
-        setTasks(updatedTasks)
+
+        const updatedProject = { ...project }
+        updatedProject.tasks = updatedTasks
+        setProject(updatedProject)
         setAlert({ error: false, message: `Task Saved Successfully` })
       } else {
         const { data } = await axiosAPIClient.post('/tasks', task, config)
-        setTasks([...tasks, data])
+        const updatedProject = { ...project }
+        updatedProject.tasks = [...project.tasks, data.task]
+        setProject(updatedProject)
         setAlert({ error: false, message: `Task Created Successfully` })
       }
       setTimeout(() => {
         setAlert({})
-        navigate(`/projects/${task.project}`)
-      }, 3000)
+        setFormTaskModal(false)
+      }, 1000)
     } catch (error) {
       setAlert(error.response.data)
     }
+  }
+
+  const deleteTask = async () => {
+    try {
+      const token = localStorage.getItem('token')
+
+      if (!token) return
+
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+      const { data } = await axiosAPIClient.delete(`/tasks/${task._id}`, config)
+      setAlert(data)
+      const updatedProject = { ...project }
+      updatedProject.tasks = updatedProject.tasks.filter(
+        taskState => taskState._id !== task._id
+      )
+      updatedProject.id = updatedProject._id
+      // console.log('updatedProject:', updatedProject)
+      await submitProject(updatedProject)
+      setProject(updatedProject)
+    } catch (error) {
+      setAlert(error.response.data)
+    } finally {
+      setLoading(false)
+      setTask({})
+      setDeleteTaskModal(false)
+      setTimeout(() => {
+        setAlert({})
+      }, 3000)
+    }
+  }
+
+  const submitCollaborator = async email => {
+    setLoading(true)
+    try {
+      const token = localStorage.getItem('token')
+      if (!token) return
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+      const { data } = await axiosAPIClient.post(
+        '/projects/collaborators',
+        { email },
+        config
+      )
+      setAlert({})
+      console.log(data)
+      setCollaborator(data.user)
+    } catch (error) {
+      setAlert(error.response.data)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const addCollaborator = async email => {
+    try {
+      const token = localStorage.getItem('token')
+      if (!token) return
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+      const { data } = await axiosAPIClient.post(
+        `/projects/collaborators/${project._id}`,
+        email,
+        config
+      )
+
+      console.log(data)
+    } catch (error) {
+      setAlert(error.response.data)
+    }
+  }
+
+  const handleModalEditTask = task => {
+    setTask(task)
+    setFormTaskModal(true)
+  }
+
+  const handleModalDeleteTask = task => {
+    setTask(task)
+    setDeleteTaskModal(true)
   }
 
   return (
@@ -202,7 +307,15 @@ const ProjectsProvider = ({ children }) => {
         resetProjectsProvider,
         setAuthorizedUser,
         submitTask,
-        tasks,
+        task,
+        handleModalEditTask,
+        deleteTaskModal,
+        handleDeleteTaskModal,
+        handleModalDeleteTask,
+        deleteTask,
+        submitCollaborator,
+        collaborator,
+        addCollaborator,
       }}
     >
       {children}

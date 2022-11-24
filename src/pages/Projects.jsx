@@ -1,7 +1,6 @@
 import { useState, useEffect, createContext } from 'react'
 import ProjectPreview from '../components/ProjectPreview'
 import useProjects from '../hooks/useProjects'
-import useAuth from '../hooks/useAuth'
 
 const Projects = () => {
   const { projects } = useProjects()

@@ -1,13 +1,15 @@
 import { useParams, Link } from 'react-router-dom'
-import { useState } from 'react'
 import { useEffectOnce } from '../hooks/useEffectOnce'
 import useProjects from '../hooks/useProjects'
 import Spinner from '../components/Spinner'
 import FormTaskModal from '../components/FormTaskModal'
+import DeleteTaskModal from '../components/DeleteTaskModal'
+import Task from '../components/Task'
+import Alert from '../components/Alert'
 
 const Project = () => {
   const params = useParams()
-  const { getProject, project, loading, handleFormTaskModal, tasks } =
+  const { getProject, project, loading, handleFormTaskModal, alert } =
     useProjects()
 
   useEffectOnce(() => {
@@ -15,7 +17,9 @@ const Project = () => {
   })
 
   const { name } = project
+
   if (loading) return <Spinner />
+  const { message } = alert
   return (
     <>
       <div className='flex justify-between'>
@@ -66,7 +70,41 @@ const Project = () => {
         </svg>
         New Task
       </button>
+
+      <p className='font-bold text-xl mt-10'>Project Tasks</p>
+
+      <div className='flex justify-center'>
+        <div className='w-full md:w-1/3 lg:w-1/4'>
+          {message && <Alert alert={alert} />}
+        </div>
+      </div>
+
+      <div className='bg-white shadow mt-10 rounded-lg'>
+        {project.tasks?.length ? (
+          project.tasks?.map(task => (
+            <Task
+              key={task._id}
+              task={task}
+            />
+          ))
+        ) : (
+          <p className='text-center my-5 p-10'>
+            No Tasks Available for this Project
+          </p>
+        )}
+      </div>
+      <div className='flex items-center justify-between mt-10'>
+        <p className='font-bold text-xl'>Collaborators</p>
+        <Link
+          to={`/projects/new-collaborator/${project._id}`}
+          className='text-gray-400 uppercase font-bold betterhover:hover:text-black'
+        >
+          Add
+        </Link>
+      </div>
+
       <FormTaskModal />
+      <DeleteTaskModal />
     </>
   )
 }

@@ -7,16 +7,39 @@ import Alert from './Alert'
 const PRIORITY = ['Low', 'Medium', 'High']
 
 const FormTaksModal = () => {
+  const [id, setId] = useState(null)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState('')
   const [dueDate, setDueDate] = useState('')
-  const { formTaskModal, handleFormTaskModal, showAlert, alert, submitTask } =
-    useProjects()
+  const {
+    formTaskModal,
+    handleFormTaskModal,
+    showAlert,
+    alert,
+    submitTask,
+    task,
+  } = useProjects()
 
   const params = useParams()
 
-  const handleSubmit = e => {
+  useEffect(() => {
+    if (task._id) {
+      setId(task._id)
+      setName(task.name)
+      setDescription(task.description)
+      setPriority(task.priority)
+      setDueDate(task.dueDate?.split('T')[0])
+      return
+    }
+    setName('')
+    setDescription('')
+    setPriority('')
+    setDueDate('')
+    setId('')
+  }, [task])
+
+  const handleSubmit = async e => {
     e.preventDefault()
 
     if ([name, description, dueDate, priority].includes('')) {
@@ -28,8 +51,15 @@ const FormTaksModal = () => {
     }
     showAlert({})
     try {
-      console.log('duedate:', dueDate)
-      submitTask({ name, description, dueDate, priority, project: params.id })
+      await submitTask({
+        id,
+        name,
+        description,
+        dueDate,
+        priority,
+        project: params.id,
+      })
+      setId(null)
       setName('')
       setDescription('')
       setPriority('')
@@ -109,7 +139,7 @@ const FormTaksModal = () => {
                     as='h3'
                     className='text-lg leading-6 font-bold text-gray-900'
                   >
-                    New Task
+                    {id ? 'Edit task' : 'New Task'}
                   </Dialog.Title>
                   {message && <Alert alert={alert} />}
                   <form
@@ -189,7 +219,7 @@ const FormTaksModal = () => {
                     <input
                       type='submit'
                       className='bg-sky-600 betterhover:hover:bg-sky-700 w-full p-3 text-white uppercase font-bold cursor-pointer transition-colors rounded text-sm'
-                      value='Create Task'
+                      value={id ? `Update Task` : `Create Task`}
                     />
                   </form>
                 </div>
