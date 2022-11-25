@@ -14,6 +14,7 @@ const ProjectsProvider = ({ children }) => {
   const [authorizedUser, setAuthorizedUser] = useState(false)
   const [task, setTask] = useState({})
   const [collaborator, setCollaborator] = useState({})
+  const [deleteCollaboratorModal, setDeleteCollaboratorModal] = useState(false)
 
   const navigate = useNavigate()
 
@@ -43,6 +44,7 @@ const ProjectsProvider = ({ children }) => {
       setAlert({})
     }, 5000)
   }
+  // SECTION:- PROJECTS
 
   const submitProject = async project => {
     try {
@@ -100,6 +102,7 @@ const ProjectsProvider = ({ children }) => {
       }
       const { data } = await axiosAPIClient(`/projects/${id}`, config)
       setProject(data.project)
+      setAlert({})
     } catch (error) {
       console.log('Error:', error.response.data)
       setAlert(error.response.data)
@@ -137,6 +140,8 @@ const ProjectsProvider = ({ children }) => {
       }, 3000)
     }
   }
+
+  // SECTION: - TASKS
 
   const handleFormTaskModal = () => {
     setFormTaskModal(!formTaskModal)
@@ -200,6 +205,7 @@ const ProjectsProvider = ({ children }) => {
   }
 
   const deleteTask = async () => {
+    setLoading(true)
     try {
       const token = localStorage.getItem('token')
 
@@ -218,7 +224,6 @@ const ProjectsProvider = ({ children }) => {
         taskState => taskState._id !== task._id
       )
       updatedProject.id = updatedProject._id
-      // console.log('updatedProject:', updatedProject)
       await submitProject(updatedProject)
       setProject(updatedProject)
     } catch (error) {
@@ -232,6 +237,18 @@ const ProjectsProvider = ({ children }) => {
       }, 3000)
     }
   }
+
+  const handleModalEditTask = task => {
+    setFormTaskModal(!formTaskModal)
+    setTask(task)
+  }
+
+  const handleModalDeleteTask = task => {
+    setDeleteTaskModal(!deleteTaskModal)
+    setTask(task)
+  }
+
+  // SECTION: - COLLABORATORS
 
   const submitCollaborator = async email => {
     setLoading(true)
@@ -249,8 +266,8 @@ const ProjectsProvider = ({ children }) => {
         { email },
         config
       )
-      setAlert({})
-      console.log(data)
+      // setAlert({})
+      console.log('submit collaborator:', data)
       setCollaborator(data.user)
     } catch (error) {
       setAlert(error.response.data)
@@ -260,6 +277,7 @@ const ProjectsProvider = ({ children }) => {
   }
 
   const addCollaborator = async email => {
+    setLoading(true)
     try {
       const token = localStorage.getItem('token')
       if (!token) return
@@ -274,21 +292,63 @@ const ProjectsProvider = ({ children }) => {
         email,
         config
       )
-
-      console.log(data)
+      setAlert(data)
+      setCollaborator({})
     } catch (error) {
       setAlert(error.response.data)
+    } finally {
+      setLoading(false)
+      setTimeout(() => {
+        setAlert({})
+      }, 3000)
     }
   }
 
-  const handleModalEditTask = task => {
-    setTask(task)
-    setFormTaskModal(true)
+  const removeCollaborator = async () => {
+    setLoading(true)
+
+    try {
+      const token = localStorage.getItem('token')
+
+      if (!token) return
+
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+      const { data } = await axiosAPIClient.post(
+        `/projects/delete-collaborator/${project._id}`,
+        { id: collaborator._id },
+        config
+      )
+      setAlert(data)
+
+      const updatedProject = { ...project }
+      updatedProject.collaborators = updatedProject.collaborators.filter(
+        collaboratorState => collaboratorState._id !== collaborator._id
+      )
+      setProject(updatedProject)
+      setCollaborator({})
+    } catch (error) {
+      setAlert(error.response.data)
+    } finally {
+      setLoading(false)
+      setDeleteCollaboratorModal(false)
+      setTimeout(() => {
+        setAlert({})
+      }, 3000)
+    }
   }
 
-  const handleModalDeleteTask = task => {
-    setTask(task)
-    setDeleteTaskModal(true)
+  const handleDeleteCollaboratorModal = () => {
+    setDeleteCollaboratorModal(!deleteCollaboratorModal)
+  }
+
+  const handleModalDeleteCollaborator = collaborator => {
+    setDeleteCollaboratorModal(!deleteCollaboratorModal)
+    setCollaborator(collaborator)
   }
 
   return (
@@ -316,6 +376,10 @@ const ProjectsProvider = ({ children }) => {
         submitCollaborator,
         collaborator,
         addCollaborator,
+        deleteCollaboratorModal,
+        handleDeleteCollaboratorModal,
+        removeCollaborator,
+        handleModalDeleteCollaborator,
       }}
     >
       {children}

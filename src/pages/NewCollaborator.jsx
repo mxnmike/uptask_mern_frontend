@@ -13,7 +13,8 @@ const NewCollaborator = () => {
   useEffect(() => {
     getProject(params.id)
   }, [])
-  // console.log('Alert:', alert)
+
+  useEffect(() => {}, [collaborator])
   if (!project?._id) return <Alert alert={alert} />
   return (
     <>

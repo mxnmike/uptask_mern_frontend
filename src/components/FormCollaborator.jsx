@@ -5,14 +5,16 @@ import Alert from './Alert'
 const FormCollaborator = () => {
   const [email, setEmail] = useState('')
   const { showAlert, alert, submitCollaborator, projecto } = useProjects()
-  const handleSubmit = e => {
+
+  const handleSubmit = async e => {
     e.preventDefault()
     if (email === '') {
       showAlert({ message: 'Email is required', error: true })
       return
     }
-    submitCollaborator(email)
+    await submitCollaborator(email)
   }
+
   const { message } = alert
   return (
     <form
