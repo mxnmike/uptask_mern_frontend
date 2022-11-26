@@ -1,13 +1,16 @@
 import { useState, useEffect, createContext } from 'react'
 import ProjectPreview from '../components/ProjectPreview'
+import Alert from '../components/Alert'
 import useProjects from '../hooks/useProjects'
 
 const Projects = () => {
-  const { projects } = useProjects()
+  const { projects, alert } = useProjects()
 
+  const { message } = alert
   return (
     <>
       <h1 className='text-4xl font-black'>Projects</h1>
+      {message && <Alert alert={alert} />}
       <div className='bg-white shadow mt-10 rounded-lg'>
         {projects.length ? (
           projects.map(project => (

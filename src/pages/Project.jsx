@@ -16,19 +16,16 @@ const Project = () => {
     useProjects()
   const admin = useAdmin()
 
-  console.log('admin:', admin)
-
   useEffectOnce(() => {
     getProject(params.id)
   })
+
   const { name } = project
 
   if (loading) return <Spinner />
   const { message } = alert
 
-  return message && alert.error ? (
-    <Alert alert={alert} />
-  ) : (
+  return (
     <>
       <div className='flex justify-between'>
         <h1 className='font-black text-4xl'>{name}</h1>
@@ -101,6 +98,7 @@ const Project = () => {
           </p>
         )}
       </div>
+
       {admin && (
         <>
           <div className='flex items-center justify-between mt-10'>

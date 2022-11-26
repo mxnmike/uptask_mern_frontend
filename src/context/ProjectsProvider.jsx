@@ -106,8 +106,12 @@ const ProjectsProvider = ({ children }) => {
     } catch (error) {
       console.log('Error:', error.response.data)
       setAlert(error.response.data)
+      navigate('/projects')
     } finally {
       setLoading(false)
+      setTimeout(() => {
+        setAlert({})
+      }, 3000)
     }
   }
 
@@ -219,12 +223,6 @@ const ProjectsProvider = ({ children }) => {
       }
       const { data } = await axiosAPIClient.delete(`/tasks/${task._id}`, config)
       setAlert(data)
-      const updatedProject = { ...project }
-      updatedProject.tasks = updatedProject.tasks.filter(
-        taskState => taskState._id !== task._id
-      )
-      updatedProject.id = updatedProject._id
-      await submitProject(updatedProject)
       setProject(updatedProject)
     } catch (error) {
       setAlert(error.response.data)
@@ -351,6 +349,35 @@ const ProjectsProvider = ({ children }) => {
     setCollaborator(collaborator)
   }
 
+  const completeTask = async id => {
+    try {
+      const token = localStorage.getItem('token')
+
+      if (!token) return
+
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+      const { data } = await axiosAPIClient.post(
+        `/tasks/state/${id}`,
+        {},
+        config
+      )
+
+      const updatedProject = { ...project }
+      updatedProject.tasks = updatedProject.tasks.map(taskState =>
+        taskState._id === data.task._id ? data.task : taskState
+      )
+      setProject(updatedProject)
+      setAlert({})
+    } catch (error) {
+      setAlert(error.response.data)
+    }
+  }
+
   return (
     <ProjectsContext.Provider
       value={{
@@ -380,6 +407,7 @@ const ProjectsProvider = ({ children }) => {
         handleDeleteCollaboratorModal,
         removeCollaborator,
         handleModalDeleteCollaborator,
+        completeTask,
       }}
     >
       {children}
