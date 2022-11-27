@@ -15,6 +15,7 @@ const ProjectsProvider = ({ children }) => {
   const [task, setTask] = useState({})
   const [collaborator, setCollaborator] = useState({})
   const [deleteCollaboratorModal, setDeleteCollaboratorModal] = useState(false)
+  const [search, setSearch] = useState(false)
 
   const navigate = useNavigate()
 
@@ -236,6 +237,35 @@ const ProjectsProvider = ({ children }) => {
     }
   }
 
+  const completeTask = async id => {
+    try {
+      const token = localStorage.getItem('token')
+
+      if (!token) return
+
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+      const { data } = await axiosAPIClient.post(
+        `/tasks/state/${id}`,
+        {},
+        config
+      )
+
+      const updatedProject = { ...project }
+      updatedProject.tasks = updatedProject.tasks.map(taskState =>
+        taskState._id === data.task._id ? data.task : taskState
+      )
+      setProject(updatedProject)
+      setAlert({})
+    } catch (error) {
+      setAlert(error.response.data)
+    }
+  }
+
   const handleModalEditTask = task => {
     setFormTaskModal(!formTaskModal)
     setTask(task)
@@ -349,33 +379,8 @@ const ProjectsProvider = ({ children }) => {
     setCollaborator(collaborator)
   }
 
-  const completeTask = async id => {
-    try {
-      const token = localStorage.getItem('token')
-
-      if (!token) return
-
-      const config = {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      }
-      const { data } = await axiosAPIClient.post(
-        `/tasks/state/${id}`,
-        {},
-        config
-      )
-
-      const updatedProject = { ...project }
-      updatedProject.tasks = updatedProject.tasks.map(taskState =>
-        taskState._id === data.task._id ? data.task : taskState
-      )
-      setProject(updatedProject)
-      setAlert({})
-    } catch (error) {
-      setAlert(error.response.data)
-    }
+  const handleSearch = () => {
+    setSearch(!search)
   }
 
   return (
@@ -408,6 +413,8 @@ const ProjectsProvider = ({ children }) => {
         removeCollaborator,
         handleModalDeleteCollaborator,
         completeTask,
+        search,
+        handleSearch,
       }}
     >
       {children}

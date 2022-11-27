@@ -24,7 +24,7 @@ const Task = ({ task }) => {
           </p>
         )}
       </div>
-      <div className='flex gap-2'>
+      <div className='flex flex-col lg:flex-row gap-2'>
         {admin && (
           <button
             className='bg-indigo-600 px-4 py-3 text-white font-bold uppercase text-sm rounded-lg'
