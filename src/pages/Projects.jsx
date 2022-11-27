@@ -2,16 +2,9 @@ import { useEffect } from 'react'
 import ProjectPreview from '../components/ProjectPreview'
 import Alert from '../components/Alert'
 import useProjects from '../hooks/useProjects'
-import io from 'socket.io-client'
-
-let socket
 
 const Projects = () => {
   const { projects, alert } = useProjects()
-
-  useEffect(() => {
-    socket = io(import.meta.env.VITE_BACKEND_URL)
-  }, [])
 
   const { message } = alert
   return (

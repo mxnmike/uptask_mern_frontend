@@ -1,6 +1,9 @@
 import { useState, useEffect, createContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axiosAPIClient from '../config/clientAxios'
+import { io } from 'socket.io-client'
+
+let socket
 
 const ProjectsContext = createContext()
 
@@ -33,12 +36,17 @@ const ProjectsProvider = ({ children }) => {
         const { data } = await axiosAPIClient('/projects', config)
         setProjects(data.projects)
       } catch (error) {
-        setAlert(error.response.data)
+        console.log('error:', error)
+        setAlert(error.response?.data)
       }
     }
     return () => getProjects()
   }, [authorizedUser])
 
+  useEffect(() => {
+    socket = io(import.meta.env.VITE_BACKEND_URL)
+    return () => {}
+  }, [])
   const showAlert = alert => {
     setAlert(alert)
     setTimeout(() => {
@@ -146,6 +154,14 @@ const ProjectsProvider = ({ children }) => {
     }
   }
 
+  const resetProjectsProvider = () => {
+    const token = localStorage.getItem('token')
+    if (token) return
+    setProjects([])
+    setProject({})
+    setAuthorizedUser(false)
+  }
+
   // SECTION: - TASKS
 
   const handleFormTaskModal = () => {
@@ -156,14 +172,6 @@ const ProjectsProvider = ({ children }) => {
   const handleDeleteTaskModal = () => {
     setDeleteTaskModal(!deleteTaskModal)
     // setTask({})
-  }
-
-  const resetProjectsProvider = () => {
-    const token = localStorage.getItem('token')
-    if (token) return
-    setProjects([])
-    setProject({})
-    setAuthorizedUser(false)
   }
 
   const submitTask = async task => {
@@ -195,10 +203,10 @@ const ProjectsProvider = ({ children }) => {
         setAlert({ error: false, message: `Task Saved Successfully` })
       } else {
         const { data } = await axiosAPIClient.post('/tasks', task, config)
-        const updatedProject = { ...project }
-        updatedProject.tasks = [...project.tasks, data.task]
-        setProject(updatedProject)
+
         setAlert({ error: false, message: `Task Created Successfully` })
+        //SOCKET IO
+        socket.emit('new task', data.task)
       }
       setTimeout(() => {
         setAlert({})
@@ -223,10 +231,16 @@ const ProjectsProvider = ({ children }) => {
         },
       }
       const { data } = await axiosAPIClient.delete(`/tasks/${task._id}`, config)
+      console.log('Delete Data:', data)
       setAlert(data)
+      const updatedProject = { ...project }
+      updatedProject.tasks = updatedProject.tasks.filter(
+        taskState => taskState._id !== task._id
+      )
       setProject(updatedProject)
     } catch (error) {
-      setAlert(error.response.data)
+      console.log('error delete task:', error)
+      setAlert(error.response?.data)
     } finally {
       setLoading(false)
       setTask({})
@@ -383,6 +397,13 @@ const ProjectsProvider = ({ children }) => {
     setSearch(!search)
   }
 
+  //SECTION:- SOCKET.IO
+  const submitTaskProject = task => {
+    const updatedProject = { ...project }
+    updatedProject.tasks = [...updatedProject.tasks, task]
+    setProject(updatedProject)
+  }
+
   return (
     <ProjectsContext.Provider
       value={{
@@ -415,6 +436,7 @@ const ProjectsProvider = ({ children }) => {
         completeTask,
         search,
         handleSearch,
+        submitTaskProject,
       }}
     >
       {children}

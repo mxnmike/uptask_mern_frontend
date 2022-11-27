@@ -4,6 +4,8 @@ export const validateEmail = email => {
 }
 
 export const formatDate = date => {
+  const splittedDate = new Date(date.split('T')[0])
+  console.log('split date:', splittedDate)
   const newDate = new Date(date.split('T')[0].split('-'))
   const options = {
     weekday: 'long',

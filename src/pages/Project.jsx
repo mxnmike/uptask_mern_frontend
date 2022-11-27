@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useEffectOnce } from '../hooks/useEffectOnce'
 import useProjects from '../hooks/useProjects'
@@ -9,15 +10,37 @@ import DeleteCollaboratorModal from '../components/DeleteCollaboratorModal'
 import Task from '../components/Task'
 import Alert from '../components/Alert'
 import Collaborator from '../components/Collaborator'
+import io from 'socket.io-client'
+
+let socket
 
 const Project = () => {
   const params = useParams()
-  const { getProject, project, loading, handleFormTaskModal, alert } =
-    useProjects()
+  const {
+    getProject,
+    project,
+    loading,
+    handleFormTaskModal,
+    alert,
+    submitTaskProject,
+  } = useProjects()
   const admin = useAdmin()
 
   useEffectOnce(() => {
     getProject(params.id)
+  })
+
+  useEffectOnce(() => {
+    socket = io(import.meta.env.VITE_BACKEND_URL)
+    socket.emit('open project', params.id)
+  })
+
+  useEffect(() => {
+    socket.on('added task', newTask => {
+      if (newTask.project === project._id) {
+        submitTaskProject(newTask)
+      }
+    })
   })
 
   const { name } = project
