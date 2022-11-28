@@ -7,7 +7,7 @@ const Task = ({ task }) => {
     useProjects()
   const { name, description, priority, dueDate, _id, state } = task
   const admin = useAdmin()
-  console.log('Due Date:', dueDate)
+
   return (
     <div className='border-b p-5 flex justify-between items-center'>
       <div className='flex flex-col items-start'>

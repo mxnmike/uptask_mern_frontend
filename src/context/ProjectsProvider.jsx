@@ -47,6 +47,7 @@ const ProjectsProvider = ({ children }) => {
     socket = io(import.meta.env.VITE_BACKEND_URL)
     return () => {}
   }, [])
+
   const showAlert = alert => {
     setAlert(alert)
     setTimeout(() => {
@@ -191,16 +192,9 @@ const ProjectsProvider = ({ children }) => {
           task,
           config
         )
-
-        const { updatedTask } = data
-        const updatedTasks = project.tasks.map(taskState =>
-          taskState._id === updatedTask._id ? updatedTask : taskState
-        )
-
-        const updatedProject = { ...project }
-        updatedProject.tasks = updatedTasks
-        setProject(updatedProject)
-        setAlert({ error: false, message: `Task Saved Successfully` })
+        //SOCKET IO
+        socket.emit('edit task', data.task)
+        setAlert(data)
       } else {
         const { data } = await axiosAPIClient.post('/tasks', task, config)
 
@@ -233,11 +227,9 @@ const ProjectsProvider = ({ children }) => {
       const { data } = await axiosAPIClient.delete(`/tasks/${task._id}`, config)
       console.log('Delete Data:', data)
       setAlert(data)
-      const updatedProject = { ...project }
-      updatedProject.tasks = updatedProject.tasks.filter(
-        taskState => taskState._id !== task._id
-      )
-      setProject(updatedProject)
+
+      //SOCKET IO
+      socket.emit('delete task', task)
     } catch (error) {
       console.log('error delete task:', error)
       setAlert(error.response?.data)
@@ -404,6 +396,24 @@ const ProjectsProvider = ({ children }) => {
     setProject(updatedProject)
   }
 
+  const deleteTaskProject = task => {
+    const updatedProject = { ...project }
+    updatedProject.tasks = updatedProject.tasks.filter(
+      taskState => taskState._id !== task._id
+    )
+    setProject(updatedProject)
+  }
+
+  const editTaskProject = task => {
+    const updatedTasks = project.tasks.map(taskState =>
+      taskState._id === task._id ? task : taskState
+    )
+
+    const updatedProject = { ...project }
+    updatedProject.tasks = updatedTasks
+    setProject(updatedProject)
+  }
+
   return (
     <ProjectsContext.Provider
       value={{
@@ -437,6 +447,8 @@ const ProjectsProvider = ({ children }) => {
         search,
         handleSearch,
         submitTaskProject,
+        deleteTaskProject,
+        editTaskProject,
       }}
     >
       {children}
