@@ -11,42 +11,42 @@ const AuthProvider = ({ children }) => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    setLoading(true)
     const authenticateUser = async () => {
       const token = localStorage.getItem('token')
       if (!token) {
         setLoading(false)
-        navigate('/')
         return
       }
+
       const config = {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
       }
+
       try {
         const { data } = await axiosAPIClient('/users/profile', config)
-        setAuth(data)
+        setAuth(data.user)
         // navigate('/projects')
       } catch (error) {
-        setAuth({})
-
         throw {
           code: 404,
           message: 'User Not Found',
           error: true,
         }
-      } finally {
-        setLoading(false)
+        setAuth({})
       }
+      setLoading(false)
     }
-    return () => authenticateUser()
+    // return () =>
+    authenticateUser()
   }, [])
 
   const signOutAuth = () => {
     setAuth({})
   }
+
   return (
     <AuthContext.Provider value={{ auth, setAuth, loading, signOutAuth }}>
       {children}

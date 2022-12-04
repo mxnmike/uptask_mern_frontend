@@ -2,15 +2,17 @@ import { Outlet, Navigate } from 'react-router-dom'
 import useAuth from '../hooks/useAuth'
 import Header from '../components/Header'
 import Sidebar from '../components/Sidebar'
+import Spinner from '../components/Spinner'
 
 const ProtectedRoute = () => {
-  const { auth } = useAuth()
-  const { user } = auth
-  // if (!user?._id) return 'loading'
+  const { auth, loading } = useAuth()
+  // const user = auth.user
+  console.log('Auth:', auth)
+  if (loading) return <Spinner />
 
   return (
     <>
-      {user?._id ? (
+      {auth._id ? (
         <div className='bg-gray-100'>
           <Header />
           <div className='md:flex md:min-h-screen'>
