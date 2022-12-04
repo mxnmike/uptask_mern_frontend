@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext } from 'react'
-import { useNavigate } from 'react-router-dom'
 import axiosAPIClient from '../config/clientAxios'
+import { useNavigate } from 'react-router-dom'
+import useAuth from '../hooks/useAuth'
 import { io } from 'socket.io-client'
 
 let socket
@@ -14,13 +15,13 @@ const ProjectsProvider = ({ children }) => {
   const [loading, setLoading] = useState(false)
   const [formTaskModal, setFormTaskModal] = useState(false)
   const [deleteTaskModal, setDeleteTaskModal] = useState(false)
-  const [authorizedUser, setAuthorizedUser] = useState(false)
   const [task, setTask] = useState({})
   const [collaborator, setCollaborator] = useState({})
   const [deleteCollaboratorModal, setDeleteCollaboratorModal] = useState(false)
   const [search, setSearch] = useState(false)
 
   const navigate = useNavigate()
+  const { auth } = useAuth()
 
   useEffect(() => {
     const getProjects = async () => {
@@ -36,12 +37,11 @@ const ProjectsProvider = ({ children }) => {
         const { data } = await axiosAPIClient('/projects', config)
         setProjects(data.projects)
       } catch (error) {
-        console.log('error:', error)
         setAlert(error.response?.data)
       }
     }
     return () => getProjects()
-  }, [authorizedUser])
+  }, [auth])
 
   useEffect(() => {
     socket = io(import.meta.env.VITE_BACKEND_URL)
@@ -68,7 +68,6 @@ const ProjectsProvider = ({ children }) => {
       }
       if (project.id) {
         //Editing
-        console.log('Editing')
         const { data } = await axiosAPIClient.put(
           `/projects/${project.id}`,
           project,
@@ -83,7 +82,6 @@ const ProjectsProvider = ({ children }) => {
         setProjects(updatedProjects)
         setAlert({ error: false, message: `Project Saved Successfully` })
       } else {
-        console.log('Creating New')
         const { data } = await axiosAPIClient.post('/projects', project, config)
         setProjects([...projects, data])
         setAlert({ error: false, message: `Project Created Successfully` })
@@ -114,7 +112,6 @@ const ProjectsProvider = ({ children }) => {
       setProject(data.project)
       setAlert({})
     } catch (error) {
-      console.log('Error:', error.response.data)
       setAlert(error.response.data)
       navigate('/projects')
     } finally {
@@ -153,14 +150,6 @@ const ProjectsProvider = ({ children }) => {
         navigate('/projects')
       }, 3000)
     }
-  }
-
-  const resetProjectsProvider = () => {
-    const token = localStorage.getItem('token')
-    if (token) return
-    setProjects([])
-    setProject({})
-    setAuthorizedUser(false)
   }
 
   // SECTION: - TASKS
@@ -225,13 +214,11 @@ const ProjectsProvider = ({ children }) => {
         },
       }
       const { data } = await axiosAPIClient.delete(`/tasks/${task._id}`, config)
-      console.log('Delete Data:', data)
       setAlert(data)
 
       //SOCKET IO
       socket.emit('delete task', task)
     } catch (error) {
-      console.log('error delete task:', error)
       setAlert(error.response?.data)
     } finally {
       setLoading(false)
@@ -261,11 +248,8 @@ const ProjectsProvider = ({ children }) => {
         config
       )
 
-      const updatedProject = { ...project }
-      updatedProject.tasks = updatedProject.tasks.map(taskState =>
-        taskState._id === data.task._id ? data.task : taskState
-      )
-      setProject(updatedProject)
+      //SOCKET.io
+      socket.emit('complete task', data.task)
       setAlert({})
     } catch (error) {
       setAlert(error.response.data)
@@ -300,8 +284,6 @@ const ProjectsProvider = ({ children }) => {
         { email },
         config
       )
-      // setAlert({})
-      console.log('submit collaborator:', data)
       setCollaborator(data.user)
     } catch (error) {
       setAlert(error.response.data)
@@ -405,13 +387,25 @@ const ProjectsProvider = ({ children }) => {
   }
 
   const editTaskProject = task => {
-    const updatedTasks = project.tasks.map(taskState =>
+    const updatedProject = { ...project }
+    updatedProject.tasks = updatedProject.tasks.map(taskState =>
       taskState._id === task._id ? task : taskState
     )
-
-    const updatedProject = { ...project }
-    updatedProject.tasks = updatedTasks
     setProject(updatedProject)
+  }
+
+  const completeTaskProject = task => {
+    const updatedProject = { ...project }
+    updatedProject.tasks = updatedProject.tasks.map(taskState =>
+      taskState._id === task._id ? task : taskState
+    )
+    setProject(updatedProject)
+  }
+
+  const signOut = () => {
+    setProjects([])
+    setProject({})
+    setAlert({})
   }
 
   return (
@@ -427,8 +421,6 @@ const ProjectsProvider = ({ children }) => {
         loading,
         formTaskModal,
         handleFormTaskModal,
-        resetProjectsProvider,
-        setAuthorizedUser,
         submitTask,
         task,
         handleModalEditTask,
@@ -449,6 +441,8 @@ const ProjectsProvider = ({ children }) => {
         submitTaskProject,
         deleteTaskProject,
         editTaskProject,
+        completeTaskProject,
+        signOut,
       }}
     >
       {children}

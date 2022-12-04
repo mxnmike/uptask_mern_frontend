@@ -11,6 +11,5 @@ export const formatDate = date => {
     month: 'long',
     day: 'numeric',
   }
-  console.log(newDate)
   return newDate.toLocaleDateString('es-ES', options)
 }

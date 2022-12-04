@@ -44,8 +44,11 @@ const AuthProvider = ({ children }) => {
     return () => authenticateUser()
   }, [])
 
+  const signOutAuth = () => {
+    setAuth({})
+  }
   return (
-    <AuthContext.Provider value={{ auth, setAuth, loading }}>
+    <AuthContext.Provider value={{ auth, setAuth, loading, signOutAuth }}>
       {children}
     </AuthContext.Provider>
   )

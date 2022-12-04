@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import axiosAPIClient from '../config/clientAxios'
 import Alert from '../components/Alert'
 import useAuth from '../hooks/useAuth'
-import useProjects from '../hooks/useProjects'
 
 const Login = () => {
   const [password, setPassword] = useState('')
@@ -11,7 +10,6 @@ const Login = () => {
   const [alert, setAlert] = useState({})
 
   const { setAuth } = useAuth()
-  const { setAuthorizedUser } = useProjects()
   const navigate = useNavigate()
 
   const handleSubmit = async e => {
@@ -28,7 +26,6 @@ const Login = () => {
       localStorage.setItem('token', data.user.token)
       setAuth(data)
       setAlert({})
-      setAuthorizedUser(true)
       navigate('/projects')
     } catch (error) {
       setAlert(error.response.data)
