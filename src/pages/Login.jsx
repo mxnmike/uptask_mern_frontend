@@ -24,7 +24,7 @@ const Login = () => {
         password,
       })
       localStorage.setItem('token', data.user.token)
-      setAuth(data)
+      setAuth(data.user)
       setAlert({})
       navigate('/projects')
     } catch (error) {

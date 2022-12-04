@@ -15,7 +15,7 @@ const ProjectPreview = ({ project }) => {
             {client}
           </span>
         </p>
-        {auth.user._id != owner && (
+        {auth != owner && (
           <p className='p-1 text-xs rounded-lg text-white bg-green-500 font-bold uppercase px-4 mr-5'>
             Collaborador
           </p>

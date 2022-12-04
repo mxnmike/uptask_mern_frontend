@@ -1,18 +1,17 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import useProjects from '../hooks/useProjects'
 import useAuth from '../hooks/useAuth'
 import Search from './Search'
 
 const Header = () => {
-  const navigate = useNavigate()
   const { handleSearch, signOut } = useProjects()
   const { signOutAuth } = useAuth()
 
   const handleSignOut = () => {
+    console.log('signout')
     signOut()
     signOutAuth()
     localStorage.removeItem('token')
-    // navigate('/')
   }
 
   return (
