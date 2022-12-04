@@ -6,7 +6,7 @@ const AuthContext = createContext()
 
 const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState({})
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   const navigate = useNavigate()
 
@@ -30,17 +30,17 @@ const AuthProvider = ({ children }) => {
         setAuth(data.user)
         // navigate('/projects')
       } catch (error) {
+        setAuth({})
         throw {
           code: 404,
           message: 'User Not Found',
           error: true,
         }
-        setAuth({})
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
-    // return () =>
-    authenticateUser()
+    return () => authenticateUser()
   }, [])
 
   const signOutAuth = () => {

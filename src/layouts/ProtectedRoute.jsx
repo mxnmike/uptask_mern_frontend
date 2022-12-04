@@ -6,10 +6,7 @@ import Spinner from '../components/Spinner'
 
 const ProtectedRoute = () => {
   const { auth, loading } = useAuth()
-  // const user = auth.user
-  console.log('Auth:', auth)
   if (loading) return <Spinner />
-
   return (
     <>
       {auth._id ? (
